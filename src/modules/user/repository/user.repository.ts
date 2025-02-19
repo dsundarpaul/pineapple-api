@@ -54,23 +54,34 @@ export class UserRepository {
     }
   }
 
-  async findOne(id: string): Promise<User | null> {
+  async findOne(email: string, password: string): Promise<User | null> {
     try {
-      return await this._userRepository.findOne({ where: { id } });
+      return await this._userRepository.findOne({
+        where: { email },
+        select: {
+          avatar: true,
+          blockedFrom: true,
+          email: true,
+          id: true,
+          name: true,
+          phone: true,
+          type: true,
+        },
+      });
     } catch (error) {
       this._logger.error({
         module: 'user',
         class: 'UserRepository',
         method: 'findOne',
         errorMessage: 'Db error while finding user by id',
-        data: { id },
+        data: { email },
         context: error?.message
       });
       throw error;
     }
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<Partial<User>> {
     try {
       const updateData: Partial<User> = {
         ...(updateUserDto.username && { name: updateUserDto.username }),
@@ -78,7 +89,8 @@ export class UserRepository {
       };
       
       await this._userRepository.update(id, updateData);
-      const updatedUser = await this.findOne(id);
+      const updatedUser = {} 
+      // const updatedUser = await this.findOne(id);
       if (!updatedUser) {
         throw new Error('User not found after update');
       }

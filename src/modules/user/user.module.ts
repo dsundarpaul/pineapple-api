@@ -17,6 +17,7 @@ import { Product } from '../products/entities/product.entity';
     UserRepository,
     User,
     // UniqueEmailRule
-  ]
+  ],
+  exports: [UserService]
 })
 export class UserModule {}

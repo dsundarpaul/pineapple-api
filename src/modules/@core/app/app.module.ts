@@ -10,11 +10,17 @@ import { FormsModule } from 'src/modules/forms/forms.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrimaryDatabaseModule } from 'src/database/primary-database.module';
 import { ProductsModule } from 'src/modules/products/products.module';
+import { AuthModule } from '../auth/auth.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TaskModule } from '@/modules/scheduled-tasks/scheduled-tasks.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
+    TaskModule,
     PrimaryDatabaseModule,
+    AuthModule,
     EventAnalyzerModule,
     ProductsModule,
     UserModule, 
@@ -28,5 +34,4 @@ export class AppModule {
     console.log("AppModule");
     console.log(process.env.DB_HOST);
   }
-  
 }

@@ -44,8 +44,6 @@ export class UserService {
       data: { id, updateUserDto }
     });
 
-    const existingUser = await this.findOne(id);
-
     const updatedUser = await this._userRepository.update(id, updateUserDto);
 
     this.logger.log({
@@ -68,7 +66,7 @@ export class UserService {
       data: { id }
     });
 
-    await this.findOne(id); // Verify user exists
+    await this.findOne(id, id); // Verify user exists
     await this._userRepository.remove(id);
 
     this.logger.log({
@@ -124,19 +122,18 @@ export class UserService {
     return admins;
   }
 
-  async findOne(id: string) {
+  async findOne(email: string, pass: string) {
     this.logger.log({
       module: 'user',
       class: 'UserService',
       method: 'findOne',
-      info: 'Finding user by id',
-      data: { id }
+      info: 'Finding user',
     });
 
-    const user = await this._userRepository.findOne(id);
+    const user = await this._userRepository.findOne(email, pass);
     
     if (!user) {
-      throw new NotFoundException(`User with ID "${id}" not found`);
+      throw new NotFoundException(`User with ID "${email}" not found`);
     }
 
     return user;

@@ -4,9 +4,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
-  ManyToMany,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm';
@@ -86,6 +84,9 @@ export class User {
   @ManyToOne(() => User)
   @JoinColumn()
   updatedBy?: User;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  blockedFrom?: string;
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   createdAt?: Date;
