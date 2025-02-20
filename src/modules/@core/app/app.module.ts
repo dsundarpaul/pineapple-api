@@ -13,6 +13,7 @@ import { ProductsModule } from 'src/modules/products/products.module';
 import { AuthModule } from '../auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TaskModule } from '@/modules/scheduled-tasks/scheduled-tasks.module';
+import { OrganisationModule } from '@/modules/organisation/organisation.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TaskModule } from '@/modules/scheduled-tasks/scheduled-tasks.module';
     TaskModule,
     PrimaryDatabaseModule,
     AuthModule,
+    OrganisationModule,
     EventAnalyzerModule,
     ProductsModule,
     UserModule, 
