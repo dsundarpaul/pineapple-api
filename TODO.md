@@ -1,4 +1,6 @@
 
+[] Get new DB url before depolyment
+
 ### Modules-test
 
 [x][] Auth
