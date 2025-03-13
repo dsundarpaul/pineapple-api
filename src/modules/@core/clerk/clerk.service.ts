@@ -11,15 +11,15 @@ export class ClerkService {
 
   async verifyClerkWebhook(payload: any, svixId: string, svixTimestamp: string, svixSignature: string): Promise<boolean> {
     try {
-      const webhookSecret = "whsec_KjeNicu+2uxfYc0BnQdA0uiKV0T/QieB";
+      const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
       
       if (!webhookSecret) {
         throw new Error('Missing CLERK_WEBHOOK_SECRET environment variable');
       }
 
-      console.log("***", payload)
-      console.log("***", svixId)
-      console.log("***", svixTimestamp)
+      // console.log("***", payload)
+      // console.log("***", svixId)
+      // console.log("***", svixTimestamp)
 
       const payloadString = typeof payload === "string" ? payload : JSON.stringify(payload);
 
