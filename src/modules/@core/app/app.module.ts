@@ -14,26 +14,30 @@ import { AuthModule } from '../auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TaskModule } from '@/modules/scheduled-tasks/scheduled-tasks.module';
 import { OrganisationModule } from '@/modules/organisation/organisation.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { ClerkModule } from '../clerk/clerk.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     ScheduleModule.forRoot(),
-    TaskModule,
+    // TypeOrmModule.forRoot({
+    //   autoLoadEntities: true
+    // }),
     PrimaryDatabaseModule,
+    TaskModule,
+    ClerkModule,
     AuthModule,
-    OrganisationModule,
-    EventAnalyzerModule,
-    ProductsModule,
+    // OrganisationModule,
+    // ProductsModule, 
     UserModule, 
+    // EventAnalyzerModule,
     FormsModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {
-  constructor() {
-    console.log("AppModule");
-    console.log(process.env.DB_HOST);
-  }
+  constructor(private dataSource: DataSource) {}
 }

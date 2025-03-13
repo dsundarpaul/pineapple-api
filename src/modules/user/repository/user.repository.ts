@@ -18,11 +18,13 @@ export class UserRepository {
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     try {
       const newUser = this._userRepository.create({
+        userId: createUserDto.userId,
         name: createUserDto.username,
         email: createUserDto.userEmail,
         type: 'user', // default type
         isActive: true,
-        isArchived: false
+        isArchived: false,
+        // password: createUserDto.password
       });
       return await this._userRepository.save(newUser);
     } catch (error) {
@@ -58,15 +60,17 @@ export class UserRepository {
     try {
       return await this._userRepository.findOne({
         where: { email },
-        select: {
-          avatar: true,
-          blockedFrom: true,
-          email: true,
-          id: true,
-          name: true,
-          phone: true,
-          type: true,
-        },
+        relations: ['products'],
+        // select: {
+        //   avatar: true,
+        //   password: true, // Need to remove this.
+        //   blockedFrom: true,
+        //   email: true,
+        //   id: true,
+        //   name: true,
+        //   phone: true,
+        //   type: true,
+        // },
       });
     } catch (error) {
       this._logger.error({
@@ -75,6 +79,25 @@ export class UserRepository {
         method: 'findOne',
         errorMessage: 'Db error while finding user by id',
         data: { email },
+        context: error?.message
+      });
+      throw error;
+    }
+  }
+
+  async findOneById(id: string): Promise<User | null> {
+    try {
+      return await this._userRepository.findOne({ where : { userId: id } });
+      // return this.createQueryBuilder('user')
+      // .where('user.clerkId = :clerkId', { clerkId })
+      // .getOne();
+    } catch (error) {
+      this._logger.error({
+        module: 'user',
+        class: 'UserRepository',
+        method: 'findOneById',
+        errorMessage: 'Db error while finding user by id',
+        data: { id },
         context: error?.message
       });
       throw error;
@@ -126,10 +149,11 @@ export class UserRepository {
 
   async findByProductId(productId: string): Promise<User[]> {
     try {
-      return await this._userRepository.find({
-        where: { product: { id: productId } },
-        relations: ['product']
-      });
+      return []
+      // return await this._userRepository.find({
+      //   where: { products: { id: productId } },
+      //   relations: ['product']
+      // });
     } catch (error) {
       this._logger.error({
         module: 'user',
@@ -145,13 +169,14 @@ export class UserRepository {
 
   async findAdminsByProductId(productId: string): Promise<User[]> {
     try {
-      return await this._userRepository.find({
-        where: {
-          product: { id: productId },
-          type: 'admin'
-        },
-        relations: ['product']
-      });
+      return []
+      // return await this._userRepository.find({
+      //   where: {
+      //     products: { id: productId },
+      //     type: 'admin'
+      //   },
+      //   relations: ['product']
+      // });
     } catch (error) {
       this._logger.error({
         module: 'user',

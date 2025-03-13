@@ -5,7 +5,7 @@ import { Interval } from "@nestjs/schedule";
 export class TasksService {
   private readonly logger = new Logger(TasksService.name)
 
-  @Interval(5000)
+  @Interval(50000)
   handleTimeout() {
     this.logger.debug('Priting interval task 😁😁😁')
   }

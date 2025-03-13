@@ -32,12 +32,13 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync( token, { secret: 'haha' })
       console.log(payload)
       request['user'] = payload;
-    } catch {
+    } catch (error) {
       this.logger.error({
         module: 'auth',
         class: 'AuthGuard',
         method: 'canActivate',
         info: 'Error while verifying token',
+        context: error
       });
       throw new UnauthorizedException();
     }

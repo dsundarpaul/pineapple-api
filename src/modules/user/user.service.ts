@@ -24,6 +24,8 @@ export class UserService {
 
     const createdUser = await this._userRepository.createUser(createUserDto);
 
+    if(!createdUser) { return null; }
+
     this.logger.log({
       module: 'user',
       class: 'UserService',
@@ -136,6 +138,40 @@ export class UserService {
       throw new NotFoundException(`User with ID "${email}" not found`);
     }
 
+    this.logger.log({
+      module: 'user',
+      class: 'UserService',
+      method: 'findOne',
+      info: 'User found',
+      data: { email, user }
+    });
+    
+    return user;
+  }
+
+  async findOneById(id: any) {
+    this.logger.log({
+      module: 'user',
+      class: 'UserService',
+      method: 'findOneById',
+      info: 'Finding user by ID',
+      data: { id }
+    });
+
+    const user = await this._userRepository.findOneById(id);
+    
+    if (!user) {
+      throw new NotFoundException(`User with ID "${id}" not found`);
+    }
+
+    this.logger.log({
+      module: 'user',
+      class: 'UserService',
+      method: 'findOneById',
+      info: 'User found',
+      data: { id, user }
+    });
+    
     return user;
   }
 }

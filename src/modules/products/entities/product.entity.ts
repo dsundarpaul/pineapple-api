@@ -5,17 +5,23 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { User } from '../../user/entities/user.entity';
+import { Event } from '@/modules/events-analyzer/entities/events.entity';
+import { UserProduct } from './user-product.entity';
 // import { Plan } from '../../plan/entities/plan.entity';
 
 @Entity()
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id?: string;
+
+  @OneToMany(() => UserProduct, userProduct => userProduct.product)
+  userProducts: UserProduct[];
 
   @Column({
     nullable: false,
@@ -24,16 +30,26 @@ export class Product {
   })
   productName: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn()
-  authorId: string;
-
   @Column({
     nullable: true,
     length: 255,
     type: 'varchar'
   })
   logo: string;
+
+  @Column({
+    nullable: true,
+    length: 255,
+    type: 'varchar'
+  })
+  productDocLink: string;
+
+  @Column({
+    nullable: true,
+    length: 255,
+    type: 'varchar'
+  })
+  githubRepoLink: string;
 
   @Column({
     nullable: true,
@@ -48,28 +64,32 @@ export class Product {
 
   @Column({ type: 'boolean', default: true })
   isActive?: boolean;
-
+  
   @Exclude()
   @Column({ type: 'boolean', default: false })
   isArchived?: boolean;
 
-  @ManyToOne(() => User)
+  @OneToMany(() => Event, (event) => event.product)
   @JoinColumn()
-  createdBy?: User;
+  events?: Event[];
 
-  @ManyToOne(() => User)
-  @JoinColumn()
-  updatedBy?: User;
+  // @ManyToOne(() => User)
+  // @JoinColumn()
+  // createdBy?: User;
 
-  @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt?: Date;
+  // @ManyToOne(() => User)
+  // @JoinColumn()
+  // updatedBy?: User;
 
-  @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  updatedAt?: Date;
+  // @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  // createdAt?: Date;
 
-  @Exclude()
-  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
-  deletedAt?: Date;
+  // @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  // updatedAt?: Date;
+
+  // @Exclude()
+  // @DeleteDateColumn({ type: 'timestamptz', nullable: true })
+  // deletedAt?: Date;
 
   @Exclude()
   @Column({ type: 'varchar', length: 300, nullable: true })

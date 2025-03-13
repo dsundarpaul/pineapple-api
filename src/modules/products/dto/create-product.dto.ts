@@ -12,8 +12,16 @@ export class CreateProductDto {
   @IsString()
   @Length(2, 255)
   public authorId: string;
+  
+  @IsString()
+  @Length(2, 255)
+  public productDocLink: string;
+  
+  @IsString()
+  @Length(2, 255)
+  public githubRepoLink: string;
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
   @IsString()
   @Length(2, 255)
   public domain: string;

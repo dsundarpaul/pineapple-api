@@ -2,6 +2,8 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Product } from "../entities/product.entity";
+import { CreateProductDto } from "../dto/create-product.dto";
+import { UserProduct } from "../entities/user-product.entity";
 // import { CreateUserDto } from "../dto/create-user.dto";
 
 @Injectable()
@@ -9,15 +11,17 @@ export class ProductRepository {
   constructor(
     @InjectRepository(Product)
     private readonly _productRepository: Repository<Product>,
+    @InjectRepository(UserProduct)
+    private _userProductRepository: Repository<UserProduct>
     // private readonly _logger: LoggerService
   ) {}
 
   private readonly _logger = new Logger(ProductRepository.name);
   
-  createProduct(createProductDto: any): any {
+  createProduct(createProductDto: CreateProductDto, userId: string): any {
     try {
-      const newProduct = this._productRepository.create(createProductDto);
-      return this._productRepository.save(newProduct as Object);
+      this._productRepository.create(createProductDto);
+      return this._productRepository.save(createProductDto as Object);
     } catch (error) {
       this._logger.error({
         module: 'products',
@@ -30,11 +34,38 @@ export class ProductRepository {
     }
   }
 
+  async findAllByUserId(userId: string): Promise<Product[]> {
+    try {
+      const userProducts = await this._userProductRepository.find({
+        where: { userId: userId },
+        relations: ['product'],
+      });
+      // const userProducts = await this._userProductRepository.createQueryBuilder('user_product')
+
+      return userProducts.map(up => ({
+        ...up.product,
+        role: up.role,
+      }));
+
+      // return this._productRepository.find({ where: { authorId: userId } });
+    } catch (error) {
+      this._logger.error({
+        module: 'products',
+        class: 'ProductRepository',
+        method: 'findAllByUserId',
+        errorMessage: 'Db error while finding all products by user id',
+        data: userId,
+        context: error?.message
+      });
+    }
+  }
+
   findByAuthorIdAndProductName(authorId: string, name): any {
     try {
-      const product = this._productRepository.find({ where: { authorId, productName: name } });
-      console.assert(product, 'Product not found');
-      return product;
+      return {}
+      // const product = this._productRepository.find({ where: { authorId, productName: name } });
+      // console.assert(product, 'Product not found');
+      // return product;
     } catch (error) {
       this._logger.error({
         module: 'products',

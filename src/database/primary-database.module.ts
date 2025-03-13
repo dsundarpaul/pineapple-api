@@ -6,6 +6,7 @@ import { TypeOrmModule, TypeOrmModuleAsyncOptions } from "@nestjs/typeorm";
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule.forRoot()],
+      autoLoadEntities: true,
       useFactory: () => ({
         type: "postgres",
         url: process.env.DATABASE_URL,

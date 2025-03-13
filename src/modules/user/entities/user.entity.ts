@@ -5,17 +5,28 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { Product } from 'src/modules/products/entities/product.entity';
+import { Product } from '@/modules/products/entities/product.entity';
+import { UserProduct } from '@/modules/products/entities/user-product.entity';
+// import { Product } from 'src/modules/products/entities/product.entity';
 // import { Account } from '../../account/entities/account.entity';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id?: string;
+
+  // @PrimaryColumn
+  @Column({
+    nullable: false,
+    type: 'varchar',
+  })
+  userId: string;
 
   @Column({
     nullable: false,
@@ -39,9 +50,9 @@ export class User {
   avatar: string;
 
   @Column({
-    nullable: false,
+    nullable: true,
     unique: true,
-    length: 15,
+    length: 35,
     type: 'varchar'
   })
   phone: string;
@@ -54,21 +65,23 @@ export class User {
   })
   email: string;
 
-  @Exclude()
-  @Column({
-    nullable: true,
-    length: 150,
-    type: 'varchar'
-  })
-  password: string;
+  @OneToMany(() => UserProduct, userProduct => userProduct.product)
+  userProducts: UserProduct[];
+
+  // @Exclude()
+  // @Column({
+  //   nullable: true,
+  //   length: 150,
+  //   type: 'varchar'
+  // })
+  // password: string;
 
   // @OneToOne(() => Account)
   // @JoinColumn()
   // account: Account;
 
-  @ManyToOne(() => Product)
-  @JoinColumn()
-  product: Product;
+  // @OneToMany(() => Product, (product) => product.authorId)
+  // products: Product[];
 
   @Column({ type: 'boolean', default: true })
   isActive?: boolean;
@@ -77,13 +90,13 @@ export class User {
   @Column({ type: 'boolean', default: false })
   isArchived?: boolean;
 
-  @ManyToOne(() => User)
-  @JoinColumn()
-  createdBy?: User;
+  // @ManyToOne(() => User)
+  // @JoinColumn()
+  // createdBy?: User;
 
-  @ManyToOne(() => User)
-  @JoinColumn()
-  updatedBy?: User;
+  // @ManyToOne(() => User)
+  // @JoinColumn()
+  // updatedBy?: User;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   blockedFrom?: string;

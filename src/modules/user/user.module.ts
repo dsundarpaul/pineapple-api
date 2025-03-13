@@ -6,10 +6,12 @@ import { User } from './entities/user.entity';
 import { UniqueEmailRule } from './constraints/UniqueEmailRule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from '../products/entities/product.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UserProduct } from '../products/entities/user-product.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Product])
+    TypeOrmModule.forFeature([User, UserProduct, Product])
   ],
   controllers: [UserController],
   providers: [

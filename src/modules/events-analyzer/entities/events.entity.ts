@@ -1,15 +1,14 @@
 import { Exclude } from "class-transformer";
 import { Product } from "src/modules/products/entities/product.entity";
 import { User } from "src/modules/user/entities/user.entity";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, RelationId, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Event {
   @PrimaryGeneratedColumn()
   id: string;
 
-  @ManyToOne(() => Product)
-  @JoinColumn()
+  @ManyToOne(() => Product, (product) => product.events, { onDelete: 'CASCADE'})
   product: Product;
 
   @Column({
@@ -30,15 +29,15 @@ export class Event {
   eventVenue: string;
 
   @Column({ type: 'boolean', default: true })
-  isActive?: boolean;
+  isActive: boolean;
 
   @Exclude()
   @Column({ type: 'boolean', default: false })
-  isArchived?: boolean;
+  isArchived: boolean;
 
   @ManyToOne(() => User)
-  @JoinColumn()
-  createdBy?: User;
+  // @JoinColumn()
+  createdBy: User;
 
   @ManyToOne(() => User)
   @JoinColumn()

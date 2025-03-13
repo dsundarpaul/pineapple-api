@@ -22,6 +22,4 @@ export class CreateEventDto extends AbstractDto {
   @IsString()
   @Length(3, 255)
   public eventVenue: string;
-  
-
 }
