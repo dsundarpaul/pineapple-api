@@ -32,7 +32,7 @@ import { ClerkModule } from '../clerk/clerk.module';
     // OrganisationModule,
     // ProductsModule, 
     UserModule, 
-    // EventAnalyzerModule,
+    EventAnalyzerModule,
     FormsModule
   ],
   controllers: [AppController],

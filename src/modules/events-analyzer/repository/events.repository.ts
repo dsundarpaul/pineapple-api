@@ -1,10 +1,22 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, Like, Between, FindOptionsWhere } from "typeorm";
 import { CreateEventDto } from "../dto/create-event.dto";
 import { Event } from "../entities/events.entity";
 import { Product } from "@/modules/products/entities/product.entity";
 import { User } from "@/modules/user/entities/user.entity";
+
+export interface EventQueryParams {
+  search?: string;
+  startDate?: Date;
+  endDate?: Date;
+  location?: string;
+  venue?: string;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+  page?: number;
+  limit?: number;
+}
 
 @Injectable()
 export class EventRepository {
@@ -93,5 +105,74 @@ export class EventRepository {
       this._logger.error({ module: 'events', class: 'EventRepository', method: 'getEventsByProductId', errorMessage: 'Failed to event', context: error
       })
     }
+  }
+
+  async findAllWithFilters(
+    productId: string,
+    params: EventQueryParams,
+  ): Promise<{ events: Event[]; total: number }> {
+    const {
+      search,
+      startDate,
+      endDate,
+      location,
+      venue,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+      page = 1,
+      limit = 10,
+    } = params;
+
+    const queryBuilder = this._eventRepository
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.speakers', 'speakers')
+      .leftJoinAndSelect('event.createdBy', 'createdBy')
+      .leftJoinAndSelect('event.updatedBy', 'updatedBy')
+      .where('event.product.id = :productId', { productId });
+
+    // Apply search filter
+    if (search) {
+      queryBuilder.andWhere(
+        '(event.eventName ILIKE :search OR event.eventDescription ILIKE :search OR event.eventAgenda ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    // Apply date range filter
+    if (startDate && endDate) {
+      queryBuilder.andWhere('event.eventStartDateTime BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate,
+      });
+    }
+
+    // Apply location filter
+    if (location) {
+      queryBuilder.andWhere('event.eventLocation ILIKE :location', {
+        location: `%${location}%`,
+      });
+    }
+
+    // Apply venue filter
+    if (venue) {
+      queryBuilder.andWhere('event.eventVenue ILIKE :venue', {
+        venue: `%${venue}%`,
+      });
+    }
+
+    // Apply sorting
+    queryBuilder.orderBy(`event.${sortBy}`, sortOrder);
+
+    // Apply pagination
+    const skip = (page - 1) * limit;
+    queryBuilder.skip(skip).take(limit);
+
+    // Get total count
+    const total = await queryBuilder.getCount();
+
+    // Get events
+    const events = await queryBuilder.getMany();
+
+    return { events, total };
   }
 }

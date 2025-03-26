@@ -1,22 +1,20 @@
 import { Module } from '@nestjs/common';
-import { EventAnalyzerService } from './event-analyzer.service';
-import { EventAnalyzerController } from './event-analyzer.controller';
-import { EventRepository } from './repository/events.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
-import { Product } from '../products/entities/product.entity';
-import { User } from '../user/entities/user.entity';
+import { EventAnalyzerController } from './event-analyzer.controller';
+import { EventAnalyzerService } from './event-analyzer.service';
 import { Event } from './entities/events.entity';
-import { ProductsModule } from '../products/products.module';
+import { Speaker } from './entities/speaker.entity';
+import { Product } from '../products/entities/product.entity';
 import { UserModule } from '../user/user.module';
+import { EventRepository } from './repository/events.repository';
 
 @Module({
   imports: [
-    ProductsModule, 
-    UserModule, 
-    TypeOrmModule.forFeature([Event, Product, User])
+    TypeOrmModule.forFeature([Event, Speaker, Product]),
+    UserModule
   ],
   controllers: [EventAnalyzerController],
   providers: [EventAnalyzerService, EventRepository],
+  exports: [EventAnalyzerService],
 })
 export class EventAnalyzerModule {}

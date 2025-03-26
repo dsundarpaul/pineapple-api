@@ -1,11 +1,12 @@
 import { Exclude } from "class-transformer";
 import { Product } from "src/modules/products/entities/product.entity";
 import { User } from "src/modules/user/entities/user.entity";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, RelationId, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationId, UpdateDateColumn } from "typeorm";
+import { Speaker } from "./speaker.entity";
 
 @Entity()
 export class Event {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ManyToOne(() => Product, (product) => product.events, { onDelete: 'CASCADE'})
@@ -13,20 +14,37 @@ export class Event {
 
   @Column({
     nullable: false,
-    unique: true,
     length: 255,
     type: 'varchar',
   })
   eventName: string;
 
   @Column()
+  eventAgenda: string;
+
+  @Column()
   eventDescription: string;
+
+  @Column({ type: 'timestamptz' })
+  eventStartDateTime: Date;
+
+  @Column({ type: 'timestamptz' })
+  eventEndDateTime: Date;
 
   @Column()
   eventLocation: string;
 
   @Column()
   eventVenue: string;
+
+  @Column()
+  eventVenueCapacity: number;
+
+  @Column({ type: 'jsonb', nullable: true })
+  rsvpList: any[];
+
+  @OneToMany(() => Speaker, (speaker) => speaker.event)
+  speakers: Speaker[];
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
@@ -36,7 +54,6 @@ export class Event {
   isArchived: boolean;
 
   @ManyToOne(() => User)
-  // @JoinColumn()
   createdBy: User;
 
   @ManyToOne(() => User)

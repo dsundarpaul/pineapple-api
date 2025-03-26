@@ -1,25 +1,43 @@
-import { IsNotEmpty, IsString, Length } from "class-validator";
-import { AbstractDto } from "src/shared/dto/abstract.dto";
+import { IsString, IsNumber, IsDate, IsArray, IsOptional, ValidateNested, Min, IsNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CreateSpeakerDto } from './create-speaker.dto';
 
-export class CreateEventDto extends AbstractDto {
-  @IsNotEmpty()
+export class CreateEventDto {
   @IsString()
-  @Length(3, 255)
-  public eventName: string;
-  // @EventsExist()
+  @IsNotEmpty()
+  eventName: string;
 
-  @IsNotEmpty()
   @IsString()
-  @Length(3, 255)
-  public eventDescription: string;
-  
   @IsNotEmpty()
+  eventAgenda: string;
+
   @IsString()
-  @Length(3, 255)
-  public eventLocation: string;
-  
   @IsNotEmpty()
+  eventDescription: string;
+
+  @IsDate()
+  @Type(() => Date)
+  eventStartDateTime: Date;
+
+  @IsDate()
+  @Type(() => Date)
+  eventEndDateTime: Date;
+
   @IsString()
-  @Length(3, 255)
-  public eventVenue: string;
+  @IsNotEmpty()
+  eventLocation: string;
+
+  @IsString()
+  @IsNotEmpty()
+  eventVenue: string;
+
+  @IsNumber()
+  @Min(1)
+  eventVenueCapacity: number;
+
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => CreateSpeakerDto)
+  speakers?: CreateSpeakerDto[];
 }
