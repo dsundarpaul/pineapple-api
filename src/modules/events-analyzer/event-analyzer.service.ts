@@ -54,12 +54,32 @@ export class EventAnalyzerService {
       queryParams,
     );
 
+    // Get additional stats
+    const uniqueLocations = await this.eventRepository
+      .createQueryBuilder('event')
+      .select('COUNT(DISTINCT event.eventLocation)', 'count')
+      .where('event.product.id = :productId', { productId })
+      .getRawOne();
+
+    const uniqueSpeakers = await this.eventRepository
+      .createQueryBuilder('event')
+      .leftJoin('event.speakers', 'speakers')
+      .select('COUNT(DISTINCT speakers.id)', 'count')
+      .where('event.product.id = :productId', { productId })
+      .getRawOne();
+
+    const totalRSVPs = await this.eventRepository
+      .createQueryBuilder('event')
+      .select('SUM(JSONB_ARRAY_LENGTH(event.rsvpList))', 'count')
+      .where('event.product.id = :productId', { productId })
+      .getRawOne();
+
     this.logger.log({
       module: 'events-analyzer',
       class: 'EventAnalyzerService',
       method: 'getAllEvents',
       info: 'Events fetched successfully',
-      data: { total }
+      data: { total, stats: { total, uniqueLocations, uniqueSpeakers, totalRSVPs } }
     });
 
     return {
@@ -70,7 +90,74 @@ export class EventAnalyzerService {
         limit: queryParams.limit || 10,
         totalPages: Math.ceil(total / (queryParams.limit || 10)),
       },
+      stats: [
+        {
+          key: 'total_events',
+          label: 'Total Events',
+          value: total || 0,
+          percentageChange: 0
+        },
+        {
+          key: 'unique_locations',
+          label: 'Unique Locations',
+          value: parseInt(uniqueLocations.count) || 0,
+          percentageChange: 0
+        },
+        {
+          key: 'unique_speakers',
+          label: 'Unique Speakers',
+          value: parseInt(uniqueSpeakers.count) || 0,
+          percentageChange: 0
+        },
+        {
+          key: 'total_rsvps',
+          label: 'Total RSVPs',
+          value: parseInt(totalRSVPs.count) || 0,
+          percentageChange: 0
+        }
+      ]
     };
+  }
+
+  async getMonthlyMeetupsByCity(productId: string, city: string) {
+    this.logger.log({
+      module: 'events-analyzer',
+      class: 'EventAnalyzerService',
+      method: 'getMonthlyMeetupsByCity',
+      info: 'Fetching monthly meetups by city',
+      data: { productId, city }
+    });
+
+    // Check if product exists
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      this.logger.error({
+        module: 'events-analyzer',
+        class: 'EventAnalyzerService',
+        method: 'getMonthlyMeetupsByCity',
+        errorMessage: 'Product not found',
+        data: { productId }
+      });
+      throw new NotFoundException(`Product with ID ${productId} not found`);
+    }
+
+    const monthlyMeetups = await this.eventRepositoryCustom.getMonthlyMeetupsByCity(
+      productId,
+      city,
+    );
+
+    this.logger.log({
+      module: 'events-analyzer',
+      class: 'EventAnalyzerService',
+      method: 'getMonthlyMeetupsByCity',
+      info: 'Monthly meetups fetched successfully',
+      data: { monthlyMeetups }
+    });
+
+    return monthlyMeetups;
   }
 
   async createEvent(
@@ -177,13 +264,23 @@ export class EventAnalyzerService {
 
     // Create speakers if provided
     if (createEventDto.speakers && createEventDto.speakers.length > 0) {
-      const speakers = createEventDto.speakers.map(speakerDto =>
-        this.speakerRepository.create({
-          ...speakerDto,
-          event: savedEvent,
-        }),
+      const speakers = await Promise.all(
+        createEventDto.speakers.map(async (speakerDto) => {
+          let speaker = await this.speakerRepository.findOne({
+            where: { name: speakerDto.name }
+          });
+
+          if (!speaker) {
+            speaker = this.speakerRepository.create(speakerDto);
+            speaker = await this.speakerRepository.save(speaker);
+          }
+
+          return speaker;
+        })
       );
-      await this.speakerRepository.save(speakers);
+
+      savedEvent.speakers = speakers;
+      await this.eventRepository.save(savedEvent);
     }
 
     this.logger.log({

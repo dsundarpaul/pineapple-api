@@ -18,6 +18,18 @@ export interface EventQueryParams {
   limit?: number;
 }
 
+export interface EventAnalytics {
+  totalEvents: number;
+  uniqueLocations: number;
+  uniqueSpeakers: number;
+  totalRSVPs: number;
+}
+
+export interface MonthlyMeetupsByCity {
+  month: string;
+  count: number;
+}
+
 @Injectable()
 export class EventRepository {
   constructor(
@@ -110,7 +122,7 @@ export class EventRepository {
   async findAllWithFilters(
     productId: string,
     params: EventQueryParams,
-  ): Promise<{ events: Event[]; total: number }> {
+  ): Promise<{ events: Event[]; total: number; analytics: EventAnalytics }> {
     const {
       search,
       startDate,
@@ -173,6 +185,52 @@ export class EventRepository {
     // Get events
     const events = await queryBuilder.getMany();
 
-    return { events, total };
+    // Get analytics
+    const analytics = await this.getEventAnalytics(productId);
+
+    return { events, total, analytics };
+  }
+
+  async getEventAnalytics(productId: string): Promise<EventAnalytics> {
+    const result = await this._eventRepository
+      .createQueryBuilder('event')
+      .select([
+        'COUNT(DISTINCT event.id) as totalEvents',
+        'COUNT(DISTINCT event.eventLocation) as uniqueLocations',
+        'COUNT(DISTINCT speakers.id) as uniqueSpeakers',
+        'SUM(JSONB_ARRAY_LENGTH(event.rsvpList)) as totalRSVPs'
+      ])
+      .leftJoin('event.speakers', 'speakers')
+      .where('event.product.id = :productId', { productId })
+      .getRawOne();
+
+    return {
+      totalEvents: parseInt(result.totalEvents) || 0,
+      uniqueLocations: parseInt(result.uniqueLocations) || 0,
+      uniqueSpeakers: parseInt(result.uniqueSpeakers) || 0,
+      totalRSVPs: parseInt(result.totalRSVPs) || 0
+    };
+  }
+
+  async getMonthlyMeetupsByCity(
+    productId: string,
+    city: string,
+  ): Promise<MonthlyMeetupsByCity[]> {
+    const result = await this._eventRepository
+      .createQueryBuilder('event')
+      .select([
+        'TO_CHAR(event.eventStartDateTime, \'YYYY-MM\') as month',
+        'COUNT(*) as count'
+      ])
+      .where('event.product.id = :productId', { productId })
+      .andWhere('event.eventLocation ILIKE :city', { city: `%${city}%` })
+      .groupBy('month')
+      .orderBy('month', 'ASC')
+      .getRawMany();
+
+    return result.map(item => ({
+      month: item.month,
+      count: parseInt(item.count)
+    }));
   }
 }

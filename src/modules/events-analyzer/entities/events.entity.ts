@@ -1,12 +1,12 @@
 import { Exclude } from "class-transformer";
 import { Product } from "src/modules/products/entities/product.entity";
 import { User } from "src/modules/user/entities/user.entity";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationId, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Speaker } from "./speaker.entity";
 
 @Entity()
 export class Event {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
   id: string;
 
   @ManyToOne(() => Product, (product) => product.events, { onDelete: 'CASCADE'})
@@ -43,7 +43,18 @@ export class Event {
   @Column({ type: 'jsonb', nullable: true })
   rsvpList: any[];
 
-  @OneToMany(() => Speaker, (speaker) => speaker.event)
+  @ManyToMany(() => Speaker, (speaker) => speaker.events)
+  @JoinTable({
+    name: 'event_speakers',
+    joinColumn: {
+      name: 'event_id',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'speaker_id',
+      referencedColumnName: 'id'
+    }
+  })
   speakers: Speaker[];
 
   @Column({ type: 'boolean', default: true })

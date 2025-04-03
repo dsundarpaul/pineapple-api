@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Event } from "./events.entity";
 
 @Entity()
@@ -6,7 +6,7 @@ export class Speaker {
   @PrimaryGeneratedColumn()
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column({ nullable: true })
@@ -33,6 +33,6 @@ export class Speaker {
   @Column({ nullable: true })
   twitterUrl: string;
 
-  @ManyToOne(() => Event, (event) => event.speakers)
-  event: Event;
+  @ManyToMany(() => Event, (event) => event.speakers)
+  events: Event[];
 } 

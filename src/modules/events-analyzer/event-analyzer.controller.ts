@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nest
 import { EventAnalyzerService } from './event-analyzer.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { QueryEventsDto } from './dto/query-events.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { ClerkAuthGuard } from '../@core/clerk/guards/clerk-auth.guard';
 import { Request } from 'express';
 
@@ -13,13 +13,24 @@ export class EventAnalyzerController {
   constructor(private readonly eventAnalyzerService: EventAnalyzerService) {}
 
   @Get('products/:productId')
-  @ApiOperation({ summary: 'Get all events for a product with filters' })
-  @ApiResponse({ status: 200, description: 'Returns paginated events with filters' })
+  @ApiOperation({ summary: 'Get all events for a product with filters and analytics' })
+  @ApiResponse({ status: 200, description: 'Returns paginated events with filters and analytics' })
+  // @ApiBody({ schema: CreateEventDto })
   async getAllEvents(
     @Param('productId') productId: string,
     @Query() queryParams: QueryEventsDto,
   ) {
     return this.eventAnalyzerService.getAllEvents(productId, queryParams);
+  }
+
+  @Get('products/:productId/analytics/monthly-meetups')
+  @ApiOperation({ summary: 'Get monthly meetups count by city' })
+  @ApiResponse({ status: 200, description: 'Returns monthly meetups count for a specific city' })
+  async getMonthlyMeetupsByCity(
+    @Param('productId') productId: string,
+    @Query('city') city: string,
+  ) {
+    return this.eventAnalyzerService.getMonthlyMeetupsByCity(productId, city);
   }
 
   @Post('products/:productId')
