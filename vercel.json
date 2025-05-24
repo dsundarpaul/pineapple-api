@@ -3,12 +3,12 @@
   "builds": [
     { "src": "*.js", "use": "@vercel/node" }
   ],
-    "routes": [
+  "routes": [
     {
-      "src": "/(.)",
+      "src": "/(.*)",
       "dest": "src/main.ts",
       "methods": ["GET", "PUT", "DELETE", "POST"]
-    },
+    }
   ],
   "framework": "node"
 }
