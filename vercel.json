@@ -2,5 +2,6 @@
   "build": {
     "command": "npm run build"
   },
-  "output": "dist"
+  "output": "dist",
+  "framework": "node"
 }
