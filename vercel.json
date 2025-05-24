@@ -9,6 +9,5 @@
       "dest": "src/main.ts",
       "methods": ["GET", "PUT", "DELETE", "POST"]
     }
-  ],
-  "framework": "node"
+  ]
 }
